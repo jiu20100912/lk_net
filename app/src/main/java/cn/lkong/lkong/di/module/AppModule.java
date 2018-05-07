@@ -9,6 +9,7 @@ import javax.inject.Singleton;
 import cn.lkong.lkong.api.ApiService;
 import cn.lkong.lkong.api.net.RequestInterceptor;
 import cn.lkong.lkong.constant.Constants;
+import cn.lkong.lkong.core.SPUtils;
 import dagger.Module;
 import dagger.Provides;
 import okhttp3.OkHttpClient;
@@ -26,17 +27,24 @@ public class AppModule {
 
     @Provides
     @Singleton
-    public OkHttpClient providerOkHttpClient(){
+    public Context providerContext() {
+        return context;
+    }
+
+    @Provides
+    @Singleton
+    public OkHttpClient providerOkHttpClient() {
         return new OkHttpClient.Builder()
-                .readTimeout(10, TimeUnit.SECONDS)
-                .writeTimeout(10,TimeUnit.SECONDS)
+                .connectTimeout(20, TimeUnit.SECONDS)
+                .readTimeout(20, TimeUnit.SECONDS)
+                .writeTimeout(20, TimeUnit.SECONDS)
                 .addInterceptor(new RequestInterceptor())
                 .build();
     }
 
     @Provides
     @Singleton
-    public ApiService providerRetrofit(OkHttpClient client){
+    public ApiService providerRetrofit(OkHttpClient client) {
         return new Retrofit.Builder()
                 .client(client)
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
@@ -44,6 +52,12 @@ public class AppModule {
                 .baseUrl(Constants.BASE_URL)
                 .build()
                 .create(ApiService.class);
+    }
+
+    @Provides
+    @Singleton
+    public SPUtils providerSPUtils() {
+        return new SPUtils(context);
     }
 
 }
